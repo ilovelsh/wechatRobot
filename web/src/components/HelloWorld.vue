@@ -1,85 +1,76 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
+  <div>
+    <el-container>
+      <el-header>
+        <el-menu
+          :default-active="activeIndex2"
+          class="el-menu-demo"
+          mode="horizontal"
+          @select="handleSelect"
+          background-color="#545c64"
+          text-color="#fff"
+          active-text-color="#ffd04b"
         >
-          Core Docs
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
-      </li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
+          <el-submenu index="1">
+            <template slot="title">消息中心</template>
+            <el-menu-item index="1-1">发送好友消息</el-menu-item>
+            <el-menu-item index="1-2">发送群聊消息</el-menu-item>
+          </el-submenu>
+          <el-menu-item index="2">调度中心</el-menu-item>
+        </el-menu>
+      </el-header>
+      <el-container>
+        <el-main>
+          <el-row>
+            <el-col :span="14">
+              <div class="grid-content bg-purple">
+                <el-transfer
+                  filterable
+                  :filter-method="filterMethod"
+                  filter-placeholder="关键字进行搜索"
+                  v-model="value2"
+                  :data="data2">
+                  <el-button class="transfer-footer" slot="left-footer" size="small">刷新</el-button>
+                </el-transfer>
+              </div>
+            </el-col>
+            <el-col :span="10">
+              <div class="grid-content bg-purple-light">
+                 <el-col :span="24">
+                  <el-radio-group v-model="radio2">
+                    <el-radio :label="3">立即任务</el-radio>
+                    <el-radio :label="6">循环任务</el-radio>
+                    <el-radio :label="9">定时任务</el-radio>
+                  </el-radio-group>
+                 </el-col>
+                 <el-col :span="24">
+                  <el-radio-group v-model="radio3">
+                    <el-radio :label="3">文字</el-radio>
+                    <el-radio :label="6">语音</el-radio>
+                    <el-radio :label="8">图片</el-radio>
+                    <el-radio :label="9">文件</el-radio>
+                  </el-radio-group>
+                 </el-col>
+                 <el-col :span="24">
+                   <el-input
+                    type="textarea"
+                    :rows="2"
+                    placeholder="请输入内容"
+                    v-model="textarea">
+                   </el-input>
+                 </el-col>
+                 <el-row :gutter="20">
+                  <el-col :span="12" :offset="12">
+                    <el-button>确定</el-button>
+                    <el-button>取消</el-button>
+                  </el-col>
+                </el-row>
+              </div>
+            </el-col>
+          </el-row>
+        </el-main>
+      </el-container>
+    </el-container>
   </div>
 </template>
 
@@ -88,7 +79,15 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      activeIndex2: '1',
+      radio2: 3,
+      radio3: 3,
+      textarea: ''
+    }
+  },
+  methods: {
+    handleSelect (key, keyPath) {
+      console.log(key, keyPath)
     }
   }
 }
@@ -96,18 +95,61 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
+.el-header {
+  background-color: #b3c0d1;
+  color: #333;
+  text-align: center;
+  line-height: 60px;
+  padding: 0px;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+.el-main {
+  background-color: #e9eef3;
+  color: #333;
+  text-align: center;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+
+body > .el-container {
+  margin-bottom: 40px;
 }
-a {
-  color: #42b983;
+
+.el-container:nth-child(5) .el-aside,
+.el-container:nth-child(6) .el-aside {
+  line-height: 260px;
+}
+
+.el-container:nth-child(7) .el-aside {
+  line-height: 320px;
+}
+.el-row {
+  margin-bottom: 20px;
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+.el-col {
+  margin-top: 20px;
+  border-radius: 4px;
+}
+.bg-purple-dark {
+  background: #99a9bf;
+}
+.bg-purple {
+  background: #d3dce6;
+}
+.bg-purple-light {
+  background: #e5e9f2;
+}
+.grid-content {
+  border-radius: 4px;
+  min-height: 36px;
+}
+.row-bg {
+  padding: 10px 0;
+  background-color: #f9fafc;
+}
+.transfer-footer {
+  margin-left: 20px;
+  padding: 6px 5px;
 }
 </style>
