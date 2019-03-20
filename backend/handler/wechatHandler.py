@@ -3,6 +3,10 @@
 from flask import Blueprint, jsonify, request
 from exts.itchatExt import itchat
 
+from threading import Thread
+
+from unit import *
+
 wechatHandler = Blueprint('/wechatHandler', __name__)
 
 
@@ -74,3 +78,26 @@ def sendVideo():
     path = params.get('videoPath')
     for userid in userList:
         itchat.send_video(path, userid)
+
+
+@wechatHandler.route('/getLoginStatus', methods=['POST'])
+def getLoginStatus():
+    return itchat.check_login()
+
+
+thread = Thread()
+
+
+@wechatHandler.route('/login', methods=['POST'])
+def login():
+    global thread
+    uuid = itchat.get_QRuuid()
+    itchat.get_QR(uuid=uuid, qrCallback=QR_to_b64)
+    print(thread.is_alive())
+    if thread.is_alive():
+        return jsonify({'success': 0, 'msg': '已有登陆线程存在'})
+
+    # thread = task(monitor_login,itchat)
+    thread = Thread(target=monitor_login, args=(itchat, ))
+    thread.start()
+    return jsonify({'success': 1, 'qr': qr_b64.decode("utf-8")})
