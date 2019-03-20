@@ -17,53 +17,89 @@
             <el-menu-item index="1-2">发送群聊消息</el-menu-item>
           </el-submenu>
           <el-menu-item index="2">调度中心</el-menu-item>
+          <el-menu-item index="3" v-if="!user">登陆</el-menu-item>
         </el-menu>
       </el-header>
       <el-container>
         <el-main>
-          <el-row>
-            <el-col :span="14">
+          <el-row :gutter="20">
+            <el-col :span="16">
               <div class="grid-content bg-purple">
                 <el-transfer
                   filterable
                   :filter-method="filterMethod"
-                  filter-placeholder="关键字进行搜索"
+                  filter-placeholder="搜索"
                   v-model="value2"
-                  :data="data2">
-                  <el-button class="transfer-footer" slot="left-footer" size="small">刷新</el-button>
+                  :data="data2"
+                >
                 </el-transfer>
               </div>
             </el-col>
-            <el-col :span="10">
-              <div class="grid-content bg-purple-light">
-                 <el-col :span="24">
-                  <el-radio-group v-model="radio2">
-                    <el-radio :label="3">立即任务</el-radio>
-                    <el-radio :label="6">循环任务</el-radio>
-                    <el-radio :label="9">定时任务</el-radio>
-                  </el-radio-group>
-                 </el-col>
-                 <el-col :span="24">
-                  <el-radio-group v-model="radio3">
-                    <el-radio :label="3">文字</el-radio>
-                    <el-radio :label="6">语音</el-radio>
-                    <el-radio :label="8">图片</el-radio>
-                    <el-radio :label="9">文件</el-radio>
-                  </el-radio-group>
-                 </el-col>
-                 <el-col :span="24">
-                   <el-input
+            <el-col :span="8">
+              <div class="grid-content bg-purple">
+                <el-radio-group v-model="orderType">
+                  <el-radio :label="1">立即任务</el-radio>
+                  <el-radio :label="2">定时任务</el-radio>
+                  <el-radio :label="3">循环任务</el-radio>
+                </el-radio-group>
+                <div v-if="orderType == 2" class="selectClass">
+                  任务执行时间：
+                  <el-date-picker
+                    v-model="value3"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                  </el-date-picker>
+                </div>
+                <div v-if="orderType == 3">
+                  <el-row :gutter="10">
+                    <el-col :span="8"><el-input v-model="input" placeholder="0-23"><template slot="append">小时</template></el-input></el-col>
+                    <el-col :span="8"><el-input v-model="input" placeholder="0-59"><template slot="append">分钟</template></el-input></el-col>
+                    <el-col :span="8"><el-input v-model="input" placeholder="0-59"><template slot="append">秒</template></el-input></el-col>
+                  </el-row>
+                </div>
+                <el-radio-group v-model="msgType">
+                  <el-radio :label="1">文字消息</el-radio>
+                  <el-radio :label="2">语音消息</el-radio>
+                </el-radio-group>
+                <el-radio-group v-model="msgType">
+                  <el-radio :label="3">图片消息</el-radio>
+                  <el-radio :label="4">文件消息</el-radio>
+                </el-radio-group>
+                <div v-if="msgType == 1" class="msgClass">
+                  <el-input
                     type="textarea"
-                    :rows="2"
+                    :rows="6"
                     placeholder="请输入内容"
                     v-model="textarea">
-                   </el-input>
-                 </el-col>
-                 <el-row :gutter="20">
-                  <el-col :span="12" :offset="12">
-                    <el-button>确定</el-button>
-                    <el-button>取消</el-button>
-                  </el-col>
+                  </el-input>
+                </div>
+                <div v-if="msgType == 3" class="msgClass">
+                  <el-upload
+                    action="https://jsonplaceholder.typicode.com/posts/"
+                    list-type="picture-card"
+                    :on-preview="handlePictureCardPreview"
+                    :before-upload="beforeAvatarUpload"
+                    :on-remove="handleRemove">
+                    <i class="el-icon-plus"></i>
+                  </el-upload>
+                  <el-dialog :visible.sync="dialogVisible">
+                    <img width="100%" :src="dialogImageUrl" alt="">
+                  </el-dialog>
+                </div>
+                <div v-if="msgType == 4 || msgType == 2" class="msgClass">
+                  <el-upload
+                    class="upload-demo"
+                    drag
+                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :before-upload="beforeAvatarUpload"
+                    multiple>
+                    <i class="el-icon-upload"></i>
+                    <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                  </el-upload>
+                </div>
+                <el-row>
+                  <el-button type="success" round>成功按钮</el-button>
+                  <el-button type="info" round>信息按钮</el-button>
                 </el-row>
               </div>
             </el-col>
@@ -79,15 +115,63 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
+      user: null,
+      data2: [],
+      value1: '',
+      value2: [],
+      value3: '',
       activeIndex2: '1',
-      radio2: 3,
-      radio3: 3,
-      textarea: ''
+      orderType: 1,
+      msgType: 1,
+      textarea: '',
+      filterMethod (query, item) {
+        return item.pinyin.indexOf(query) > -1
+      },
+      dialogImageUrl: '',
+      dialogVisible: false
     }
   },
   methods: {
     handleSelect (key, keyPath) {
       console.log(key, keyPath)
+    },
+    handleRemove (file, fileList) {
+      console.log(file, fileList)
+    },
+    beforeAvatarUpload (file) {
+      // 文件格式判定
+      const isPic = this.isPicture(file.type)
+      const isMP3 = file.type === 'mp3'
+      // 文件大小判定
+      const isLt2M = file.size / 1024 / 1024 < 2
+
+      if (this.msgType === 3) {
+        if (!isPic) {
+          this.$message.error('上传必须是图片格式！')
+        }
+        if (!isLt2M) {
+          this.$message.error('上传头像图片大小不能超过 2MB!')
+        }
+        return isPic && isLt2M
+      } else if (this.msgType === 2) {
+        if (!isMP3) {
+          this.$message.error('上传必须是MP3格式！')
+        }
+        return isMP3
+      }
+    },
+    handlePictureCardPreview (file) {
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
+    },
+    isPicture (fileType) {
+      var flag = false
+      if (fileType === 'image/jpeg') {
+        flag = true
+      } else if (fileType === 'image/png') {
+        flag = true
+      }
+      return flag
     }
   }
 }
@@ -122,7 +206,7 @@ body > .el-container {
   line-height: 320px;
 }
 .el-row {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   &:last-child {
     margin-bottom: 0;
   }
@@ -151,5 +235,17 @@ body > .el-container {
 .transfer-footer {
   margin-left: 20px;
   padding: 6px 5px;
+}
+.grid-content {
+  padding: 25px 0px;
+}
+.el-radio-group {
+  margin: 5px 0px;
+}
+.msgClass {
+  padding: 5px 20px;
+}
+.selectClass {
+  padding: 5px 20px;
 }
 </style>
