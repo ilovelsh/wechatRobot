@@ -17,11 +17,10 @@
             <el-menu-item index="1-2">发送群聊消息</el-menu-item>
           </el-submenu>
           <el-menu-item index="2">调度中心</el-menu-item>
-          <el-menu-item index="3" v-if="!user">登陆</el-menu-item>
         </el-menu>
       </el-header>
       <el-container>
-        <el-main>
+        <el-main v-if="this.activeIndex2 == '1-1' || this.activeIndex2 == '1-2'">
           <el-row :gutter="20">
             <el-col :span="16">
               <div class="grid-content bg-purple">
@@ -29,6 +28,7 @@
                   filterable
                   :filter-method="filterMethod"
                   filter-placeholder="搜索"
+                  :titles="['可选列表', '发送列表']"
                   v-model="value2"
                   :data="data2"
                 >
@@ -105,6 +105,26 @@
             </el-col>
           </el-row>
         </el-main>
+        <el-main v-else-if="this.activeIndex2 == 2">
+            <el-table
+              :data="tableData"
+              style="width: 100%">
+              <el-table-column
+                prop="date"
+                label="编号"
+                width="180">
+              </el-table-column>
+              <el-table-column
+                prop="orderType"
+                label="任务类型"
+                width="180">
+              </el-table-column>
+              <el-table-column
+                prop="status"
+                label="状态">
+              </el-table-column>
+            </el-table>
+        </el-main>
       </el-container>
     </el-container>
   </div>
@@ -133,10 +153,11 @@ export default {
   },
   methods: {
     handleSelect (key, keyPath) {
-      console.log(key, keyPath)
+      // console.log(key, keyPath)
+      this.activeIndex2 = key
     },
     handleRemove (file, fileList) {
-      console.log(file, fileList)
+      // console.log(file, fileList)
     },
     beforeAvatarUpload (file) {
       // 文件格式判定

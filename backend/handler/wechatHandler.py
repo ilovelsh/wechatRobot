@@ -38,3 +38,39 @@ def getGroups():
         groupList.append(group)
 
     return groupList
+
+
+@wechatHandler.route('/sendMsg', methods=['POST'])
+def sendMsg():
+    params = request.args
+    userList = params.get('userList')
+    textMsg = params.get('msg')
+    for userid in userList:
+        itchat.send(textMsg, userid)
+
+
+@wechatHandler.route('/sendImage', methods=['POST'])
+def sendImage():
+    params = request.args
+    userList = params.get('userList')
+    path = params.get('imgPath')
+    for userid in userList:
+        itchat.send_image(path, userid)
+
+
+@wechatHandler.route('/sendFile', methods=['POST'])
+def sendFile():
+    params = request.args
+    userList = params.get('userList')
+    path = params.get('filePath')
+    for userid in userList:
+        itchat.send_file(path, userid)
+
+
+@wechatHandler.route('/sendVideo', methods=['POST'])
+def sendVideo():
+    params = request.args
+    userList = params.get('userList')
+    path = params.get('videoPath')
+    for userid in userList:
+        itchat.send_video(path, userid)
